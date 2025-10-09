@@ -31,7 +31,7 @@ api.interceptors.response.use(
         isRefreshing = true;
         try {
           const { data } = await api.post("/auth/refresh");
-          const newToken = data.accessToken;
+          const newToken = data.tokens.access;
           onRefreshed(newToken);
 
           // update authContext

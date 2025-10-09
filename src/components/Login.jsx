@@ -17,7 +17,7 @@ export default function Login() {
       await login(email, password);
       nav("/students");
     } catch (e) {
-      console.log(e);
+      console.log("login", e);
       setErr("Login failed");
     }
   };

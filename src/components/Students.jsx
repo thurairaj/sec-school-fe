@@ -9,12 +9,13 @@ export default function Students() {
 
   useEffect(() => {
     let cancelled = false;
+    console.log("students", cancelled);
     (async () => {
       try {
         const { data } = await api.get("/students");
-        if (!cancelled) setRows(data);
+        if (!cancelled) setRows(data.data);
       } catch (e) {
-        console.log(e);
+        console.log("students", e);
         if (!cancelled) setErr("Failed to fetch students");
       }
     })();
@@ -41,13 +42,14 @@ export default function Students() {
             </tr>
           </thead>
           <tbody>
-            {rows.map((row) => (
-              <tr key={row._id}>
-                <td>{row.name}</td>
-                <td>{row.major}</td>
-                <td>{row.gpa}</td>
-              </tr>
-            ))}
+            {rows &&
+              rows.map((row) => (
+                <tr key={row._id}>
+                  <td>{row.name}</td>
+                  <td>{row.major}</td>
+                  <td>{row.gpa}</td>
+                </tr>
+              ))}
           </tbody>
         </table>
       </div>

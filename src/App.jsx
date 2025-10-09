@@ -1,9 +1,9 @@
 import "./App.css";
-import Registration from "./components/Registration.jsx";
 import { Link, Route, Routes } from "react-router-dom";
 import Login from "./components/Login.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import Students from "./components/Students.jsx";
+import Register from "./components/Register.jsx";
 
 function App() {
   return (
@@ -16,7 +16,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Registration />} />
+        <Route path="/register" element={<Register />} />
         <Route
           path="/students"
           element={
