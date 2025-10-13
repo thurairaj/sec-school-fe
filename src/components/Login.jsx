@@ -23,20 +23,36 @@ export default function Login() {
   };
 
   return (
-    <div>
-      <h2>Login</h2>
-      <form onSubmit={onSubmit}>
-        <input value={email} onChange={(e) => setEmail(e.target.value)} />
-        <input
-          type={"password"}
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <button type="submit">Login</button>
+    <div className={"flex flex-col p-4 items-center"}>
+      <h2 className={"text-4xl my-4"}>Login</h2>
+      <form className={"flex flex-col w-sm gap-y-3"} onSubmit={onSubmit}>
+        <div className="flex flex-col">
+          <label htmlFor="email">Email address</label>
+          <input
+              id={"email"}
+              className={"border-2 border-gray-300"}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}/>
+        </div>
+        <div className="flex flex-col">
+          <label htmlFor="password">Password</label>
+          <input
+              id={"password"}
+              className={"border-2 border-gray-300"}
+              type={"password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+          />
+        </div>
+
+        <div className="flex flex-col mt-2">
+          <button className={"text-lg p-2 bg-blue-300 hover:bg-blue-400"} type="submit">Login</button>
+        </div>
+
       </form>
       {err && <p>{err}</p>}
-      <p>
-        No Account? <Link to={"/register"}>Register</Link>
+      <p className={"mt-4"}>
+        No Account? <Link className={"underline"} to={"/register"}>Register</Link>
       </p>
     </div>
   );

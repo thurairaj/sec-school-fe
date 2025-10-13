@@ -1,44 +1,55 @@
-import { createContext, useContext, useEffect, useState } from "react";
-import { api, attachAccessToken } from "../api/axios.api.js";
+import {createContext, useContext, useEffect, useMemo, useState} from "react";
+import { api } from "../api/axios.api.js";
+import {clearTokens, getAccessToken, getRefreshToken, setTokens} from "../api/token.api.js";
 
 const AuthContext = createContext(null);
 // eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => useContext(AuthContext);
 
 export function AuthProvider({ children }) {
-  const [token, setToken] = useState(null);
   const [user, setUser] = useState(null);
-
-  attachAccessToken(() => token);
+  const [hasTokens, setHasTokens] = useState(
+      !!getAccessToken() && !!getRefreshToken()
+  );
 
   useEffect(() => {
-    const onRef = (e) => setToken(e.details);
-    window.addEventListener("token:refreshed", onRef);
-    return () => window.removeEventListener("token:refreshed", onRef);
-  });
+    setHasTokens( !!getAccessToken() && !!getRefreshToken())
+  },[]);
 
   const login = async (email, password) => {
     const { data } = await api.post("/auth/login", { email, password });
-    console.log(data);
-    setToken(data.tokens.access);
+    setTokens({
+      accessToken: data.tokens.access,
+      refreshToken: data.tokens.refresh,
+    })
     setUser(data.user);
+    setHasTokens(true)
   };
 
   const register = async (email, password, name) => {
     const { data } = await api.post("/auth/login", { email, password, name });
-    setToken(data.tokens.access);
+    setTokens({
+      accessToken: data.tokens.access,
+      refreshToken: data.tokens.refresh,
+    })
     setUser(data.user);
+    setHasTokens(true)
   };
 
   const logout = async () => {
     try {
       await api.post("/auth/logout");
     } finally {
-      setToken(null);
+      clearTokens();
+      setUser(null)
+      setHasTokens(false)
       setUser(null);
     }
   };
-  const value = { token, user, login, register, logout };
+  const value = useMemo(
+      () => ({ user, hasTokens, login, register, logout}),
+      [user, hasTokens]
+  )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

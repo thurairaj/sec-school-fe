@@ -1,23 +1,26 @@
 import axios from "axios";
+import {clearTokens, getAccessToken, getRefreshToken, setTokens} from "./token.api.js";
 
 const API_BASE = "http://localhost:3000";
 
 export const api = axios.create({ baseURL: API_BASE, withCredentials: true });
 
-export function attachAccessToken(getToken) {
-  api.interceptors.request.use(function (request) {
-    const access = getToken?.();
-    if (access) request.headers.Authorization = `Bearer ${access}`;
-    return request;
-  });
-}
+api.interceptors.request.use(function (request) {
+  const access = getAccessToken();
+  if (access) request.headers.Authorization = `Bearer ${access}`;
+  return request;
+});
 
 let isRefreshing = false;
-let pending = [];
+let requestsQueue = [];
 
-function onRefreshed(newToken) {
-  pending.forEach((cb) => cb(newToken));
-  pending = [];
+function enqueue(newRequest) {
+  requestsQueue.push(newRequest);
+}
+
+function processAllRequests(token) {
+  requestsQueue.forEach(req => req(token))
+  requestsQueue = []
 }
 
 api.interceptors.response.use(
@@ -25,33 +28,34 @@ api.interceptors.response.use(
   async (error) => {
     const original = error.config;
 
-    if (error.response && error.response.status === 401 && !original._retry) {
+    if (error.response?.status === 401 && !original._retry && getRefreshToken()) {
       original._retry = true;
+
       if (isRefreshing) {
         isRefreshing = true;
         try {
-          const { data } = await api.post("/auth/refresh");
-          const newToken = data.tokens.access;
-          onRefreshed(newToken);
+          const { data } = await api.post("/auth/refresh", {refreshToken: getRefreshToken()});
+          setTokens({accessToken: data.tokens.access, refresh: data.tokens.refresh});
 
-          // update authContext
-          window.dispatchEvent(
-            new CustomEvent("token:refreshed", { detail: newToken }),
-          );
-          original.headers.Authorization = `Bearer ${newToken}`;
-          return api(original);
+          isRefreshing = false;
+          processAllRequests(data.tokens.access)
+          original.headers.Authorization = `Bearer ${data.tokens.access}`;
+          return api(original)
+
         } catch (e) {
           isRefreshing = false;
-          pending = [];
+          processAllRequests(null);
+          clearTokens();
           return Promise.reject(e);
         }
       }
 
-      return new Promise((resolve) =>
-        pending.push((newToken) => {
+      return new Promise((resolve, reject) =>
+        enqueue((newToken) => {
+          if (!newToken) reject();
           original.headers.Authorization = `Bearer ${newToken}`;
-          resolve(api(original));
-        }),
+          resolve(api(original))
+        })
       );
     }
 
