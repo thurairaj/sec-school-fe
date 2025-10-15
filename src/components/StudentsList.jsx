@@ -2,14 +2,12 @@ import { useAuth } from "../context/AuthContext.jsx";
 import { useEffect, useState } from "react";
 import { api } from "../api/axios.api.js";
 
-export default function Students() {
-  const { user, logout } = useAuth();
+export default function StudentsList() {
   const [rows, setRows] = useState(null);
   const [err, setErr] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
-    console.log("students", cancelled);
     (async () => {
       try {
         const { data } = await api.get("/students");
@@ -26,16 +24,13 @@ export default function Students() {
 
   return (
     <div>
-      <div style={{ display: "flex", justifyContext: "space-between" }}>
-        <h2>Students</h2>
-        <div>
-          <span>{user?.email}</span>
-          <button onClick={logout}>Logout</button>
-        </div>
+      <div className={"flex flex-col items-center"}>
+        <h2 className={"text-4xl my-4"}>Students</h2>
+
         {err && <p>{err}</p>}
-        <table>
+        <table className="table table-striped w-4xl">
           <thead>
-            <tr>
+            <tr className={"*:align-middle *:items-center *:p-4 *:text-2xl"}>
               <th>Name</th>
               <th>Major</th>
               <th>GPA</th>
@@ -44,7 +39,7 @@ export default function Students() {
           <tbody>
             {rows &&
               rows.map((row) => (
-                <tr key={row._id}>
+                <tr key={row._id} className={"*:text-center *:p-4 hover:bg-blue-100 hover:cursor-pointer"}>
                   <td>{row.name}</td>
                   <td>{row.major}</td>
                   <td>{row.gpa}</td>

@@ -1,10 +1,11 @@
-import { Link, useNavigate } from "react-router-dom";
+import {Link, Navigate, useNavigate} from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 import { useState } from "react";
 
 export default function Login() {
   const nav = useNavigate();
-  const { login } = useAuth();
+  const { login, hasTokens } = useAuth();
+
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -22,7 +23,7 @@ export default function Login() {
     }
   };
 
-  return (
+  return hasTokens ? <Navigate to={"/students"} replace /> : (
     <div className={"flex flex-col p-4 items-center"}>
       <h2 className={"text-4xl my-4"}>Login</h2>
       <form className={"flex flex-col w-sm gap-y-3"} onSubmit={onSubmit}>
