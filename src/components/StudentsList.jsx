@@ -1,8 +1,9 @@
-import { useAuth } from "../context/AuthContext.jsx";
 import { useEffect, useState } from "react";
 import { api } from "../api/axios.api.js";
+import {useNavigate} from "react-router-dom";
 
 export default function StudentsList() {
+  const nav = useNavigate();
   const [rows, setRows] = useState(null);
   const [err, setErr] = useState(null);
 
@@ -22,6 +23,10 @@ export default function StudentsList() {
     };
   }, []);
 
+  const studentClickHandler = (id) => {
+    nav(`/student/${id}`);
+  }
+
   return (
     <div>
       <div className={"flex flex-col items-center"}>
@@ -39,7 +44,7 @@ export default function StudentsList() {
           <tbody>
             {rows &&
               rows.map((row) => (
-                <tr key={row._id} className={"*:text-center *:p-4 hover:bg-blue-100 hover:cursor-pointer"}>
+                <tr onClick={() => studentClickHandler(row._id)} key={row._id} className={"*:text-center *:p-4 hover:bg-blue-100 hover:cursor-pointer"}>
                   <td>{row.name}</td>
                   <td>{row.major}</td>
                   <td>{row.gpa}</td>
